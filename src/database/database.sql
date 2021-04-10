@@ -48,7 +48,7 @@ CREATE TABLE plane(
     model varchar(255),
     seats_count integer,
     flight_range_km integer,
-    crew_num integer,
+    crew_num integer NULL,
     plane_condition varchar(255),
     PRIMARY KEY (name_plane,model,tail_code),
     FOREIGN KEY(crew_num) 
@@ -65,6 +65,7 @@ CREATE TABLE tail_number(
 );
 /*---------------------------------------------------------------------*/
 CREATE TABLE crew(
+    crew_id serial,
     crew_num integer,
     type_crew varchar(255),
     PRIMARY KEY (crew_num)
