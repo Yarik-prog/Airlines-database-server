@@ -1,16 +1,25 @@
 const pool = require("../database/db")
 const AviaCompanyController = {
     async createCompany(req,res){
-        const { name_company, country_location } = req.body
-  
-        pool.query('INSERT INTO avia_company (name_company, country_location) VALUES ($1, $2)',
+        const { name_company, country_location, address, phone_head_office} = req.body
+       
+        pool.query('INSERT INTO avia_company (name_company, country_location) VALUES ($1, $2) RETURNING *',
          [name_company, country_location], (error, result) => {
           if (error) {
             throw error
           }
-          res.status(201).send(`Avia_company added with ID: ${result.insertId}`)
-        })
-    },
+          var company_id = result.rows[0].avia_company_id
+         
+          pool.query('INSERT INTO address_head_office (address, phone_head_office, avia_company_id) VALUES ($1, $2, $3) RETURNING *',
+          [address, phone_head_office, company_id], (error, result) => {
+           if (error) {
+             throw error
+           }
+          res.status(200).json(result)
+        });
+    });
+        
+},
     async getAllCompany(req,res){
         pool.query('SELECT * FROM avia_company', (error, results) => {
             if (error) {
