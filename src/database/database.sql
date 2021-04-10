@@ -31,7 +31,8 @@ CREATE TABLE route(
     dep_country varchar(255),
     arrive_country varchar(255),
     route_status varchar(255),
-    PRIMARY KEY (dep_airport, arrive_airport)
+    PRIMARY KEY (dep_airport, arrive_airport),
+    CHECK(dep_airport <> arrive_airport)
 );
 CREATE TABLE terminal(
     terminal_id SERIAL UNIQUE,
@@ -47,11 +48,11 @@ CREATE TABLE plane(
     model varchar(255),
     seats_count integer,
     flight_range_km integer,
-    crew_id integer,
+    crew_num integer,
     plane_condition varchar(255),
     PRIMARY KEY (name_plane,model,tail_code),
-    FOREIGN KEY(crew_id) 
-	  REFERENCES crew(crew_id)
+    FOREIGN KEY(crew_num) 
+	  REFERENCES crew(crew_num)
         ON DELETE SET NULL
 );
 CREATE TABLE tail_number(
@@ -64,41 +65,31 @@ CREATE TABLE tail_number(
 );
 /*---------------------------------------------------------------------*/
 CREATE TABLE crew(
-    crew_id serial UNIQUE,
     crew_num integer,
-    staff_id integer,
-    PRIMARY KEY (crew_num,staff_id),
-    FOREIGN KEY(staff_id) 
-	  REFERENCES staff(staff_id)
-       ON DELETE CASCADE
-);
-CREATE TABLE service_crew(
-    service_crew_id serial UNIQUE,
-    service_crew_code integer,
-    staff_id integer,   
-    PRIMARY KEY (service_crew_code,staff_id),
-    FOREIGN KEY(staff_id) 
-	  REFERENCES staff(staff_id)
-       ON DELETE CASCADE
+    type_crew varchar(255),
+    PRIMARY KEY (crew_num)
 );
 CREATE TABLE staff(
    staff_id serial UNIQUE,
    fullname_staff varchar(255),
    work_position varchar(255),
    crew_num integer,
-   service_crew_num integer,
    flight_hours integer,
-    PRIMARY KEY (fullname_staff,work_position)
+    PRIMARY KEY (fullname_staff, work_position),
+    FOREIGN KEY(crew_num) 
+	  REFERENCES crew(crew_num)
+    ON DELETE SET NULL
 );
 CREATE TABLE plane_maintenance(
    plane_maintenance_id serial,
    event_date timestamp,
-   service_crew_id integer,
+   service_crew_num integer,
    tail_code varchar(255),
    result varchar(255),
     PRIMARY KEY (event_date,tail_code),
-    FOREIGN KEY(service_crew_id) 
-	  REFERENCES service_crew(service_crew_id),
+    FOREIGN KEY(service_crew_num) 
+	  REFERENCES crew(crew_num)
+       ON DELETE CASCADE,
     FOREIGN KEY(tail_code) 
 	  REFERENCES tail_number(tail_code)
        ON DELETE CASCADE
