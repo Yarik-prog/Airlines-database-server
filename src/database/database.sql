@@ -4,24 +4,21 @@ CREATE DATABASE airlines
 /*---------------------------------------------------------------------*/
 CREATE TABLE flight(
     flight_id serial UNIQUE,
-    flight_num integer,
-    dep_date timestamp,
-    route_id integer,
-    tail_code varchar(255),
+    flight_num varchar(255),
+    dep_date timestamptz,
+    route_id integer NULL,
+    tail_code varchar(255) NULL,
     add_luggage float,
-    terminal_id integer,
+    terminal varchar(255),
     runaway varchar(255),
     flight_status varchar(255),
     PRIMARY KEY (flight_num, dep_date),
     FOREIGN KEY(route_id) 
 	  REFERENCES route(route_id)
-      ON DELETE CASCADE,
+      ON DELETE SET NULL,
     FOREIGN KEY(tail_code) 
 	  REFERENCES plane(tail_code)
-      ON DELETE SET NULL,
-    FOREIGN KEY(terminal_id) 
-	  REFERENCES terminal(terminal_id)
-     ON DELETE SET NULL
+      ON DELETE SET NULL
 );
 
 CREATE TABLE route(
@@ -43,53 +40,56 @@ CREATE TABLE terminal(
 /*---------------------------------------------------------------------*/
 CREATE TABLE plane(
     plane_id SERIAL,
-    tail_code varchar(255) UNIQUE,
-    name_plane varchar(255),
-    model varchar(255),
-    seats_count integer,
-    flight_range_km integer,
+    tail_code varchar(255) UNIQUE CHECK(tail_code!=''),
+    name_plane varchar(255) CHECK(name_plane!=''), 
+    model varchar(255) CHECK(model!=''),
+    seats_count integer CHECK(seats_count>=2 AND seats_count<=700),
+    flight_range_km integer CHECK(flight_range_km>=1000 AND flight_range_km<=50000),
     crew_num integer NULL,
     plane_condition varchar(255),
     PRIMARY KEY (name_plane,model,tail_code),
     FOREIGN KEY(crew_num) 
-	  REFERENCES crew(crew_num)
+	  REFERENCES crew(crew_id)
         ON DELETE SET NULL
 );
 CREATE TABLE tail_number(
    tail_code varchar(255),
-   aviacompany_name varchar(255),
+   avia_company_id integer NULL,
    PRIMARY KEY (tail_code),
    FOREIGN KEY(tail_code) 
 	  REFERENCES plane(tail_code)
-        ON DELETE CASCADE
+        ON DELETE CASCADE,
+        FOREIGN KEY(avia_company_id) 
+	  REFERENCES avia_company(avia_company_id)
+        ON DELETE SET NULL
 );
 /*---------------------------------------------------------------------*/
 CREATE TABLE crew(
-    crew_id serial,
+    crew_id serial UNIQUE,
     crew_num integer,
     type_crew varchar(255),
-    PRIMARY KEY (crew_num)
+    PRIMARY KEY (crew_num, type_crew)
 );
 CREATE TABLE staff(
    staff_id serial UNIQUE,
-   fullname_staff varchar(255),
-   work_position varchar(255),
-   crew_num integer,
-   flight_hours integer,
+   fullname_staff varchar(255) NOT NULL CHECK(fullname_staff!=''),
+   work_position varchar(255) NOT NULL CHECK(work_position!=''),
+   crew_num integer NULL,
+   flight_hours integer NULL CHECK(flight_hours>=100 AND flight_hours<=30000),
     PRIMARY KEY (fullname_staff, work_position),
     FOREIGN KEY(crew_num) 
-	  REFERENCES crew(crew_num)
+	  REFERENCES crew(crew_id)
     ON DELETE SET NULL
 );
 CREATE TABLE plane_maintenance(
    plane_maintenance_id serial,
-   event_date timestamp,
+   event_date timestamptz,
    service_crew_num integer,
    tail_code varchar(255),
    result varchar(255),
     PRIMARY KEY (event_date,tail_code),
     FOREIGN KEY(service_crew_num) 
-	  REFERENCES crew(crew_num)
+	  REFERENCES crew(crew_id)
        ON DELETE CASCADE,
     FOREIGN KEY(tail_code) 
 	  REFERENCES tail_number(tail_code)
@@ -98,13 +98,13 @@ CREATE TABLE plane_maintenance(
 /*---------------------------------------------------------------------*/
 CREATE TABLE passenger(
     passenger_id serial UNIQUE,
-    fullname_passenger varchar(255),
-    book_date timestamp,
-    passport_number integer,
-    phone_number varchar(255),
+    fullname_passenger varchar(255) NOT NULL CHECK(fullname_passenger!=''),
+    book_date timestamptz,
+    passport_number varchar(255) UNIQUE,
+    phone_number varchar(255) UNIQUE,
     ticket_num integer,
     visa varchar(255),
-    PRIMARY KEY (fullname_passenger,book_date)
+    PRIMARY KEY (fullname_passenger, book_date)
 );
 CREATE TABLE lugagge(
     luggage_code varchar(255),
@@ -117,16 +117,20 @@ CREATE TABLE lugagge(
 );
 CREATE TABLE ticket(
    ticket_id serial UNIQUE,
-   ticket_num integer UNIQUE,
-   seat_num integer,
-   cost_ua float,
-   class varchar(255),
+   route_id integer NULL,
+   ticket_num integer UNIQUE CHECK(ticket_num>999),
+   seat_num integer CHECK(seat_num>0),
+   cost_ua float CHECK(cost_ua >= 1000 AND cost_ua<100000),
+   type_class varchar(255),
    ticket_status varchar(255),
-   passenger_id integer,
+   passenger_id integer NULL,
     PRIMARY KEY (ticket_num,seat_num),
     FOREIGN KEY(passenger_id) 
 	  REFERENCES passenger(passenger_id)
-      ON DELETE CASCADE
+      ON DELETE CASCADE,
+    FOREIGN KEY(route_id) 
+	  REFERENCES route(route_id)
+      ON DELETE SET NULL
 );
 CREATE TABLE transfer(
     flight_id integer,  

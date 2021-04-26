@@ -6,7 +6,8 @@ const RouteController = {
         pool.query('INSERT INTO route (dep_airport, arrive_airport, dep_country, arrive_country, route_status) VALUES ($1, $2, $3, $4, $5)',
          [dep_airport, arrive_airport, dep_country, arrive_country, route_status ], (error, result) => {
           if (error) {
-            throw error
+           // throw error
+            return res.status(400).json({err:error.message})
           }
           res.status(200).json("Route has been added!")
     });
@@ -15,7 +16,8 @@ const RouteController = {
     async getAllRoutes(req,res){
         pool.query('SELECT * FROM route', (error, results) => {
             if (error) {
-              throw error
+              //throw error
+              return res.status(400).json({err:error.message})
             }
             res.status(200).json(results.rows)
           })
@@ -24,7 +26,8 @@ const RouteController = {
         const id = parseInt(req.params.id)
         pool.query('SELECT * FROM route WHERE route_id = $1', [id], (error, results) => {
           if (error) {
-            throw error
+           // throw error
+           return res.status(400).json({err:error.message})
           }
           res.status(200).json(results.rows)
         })
@@ -37,7 +40,8 @@ const RouteController = {
       [dep_airport, arrive_airport, dep_country, arrive_country, route_status, id],
       (error, results) => {
         if (error) {
-          throw error
+         // throw error
+         return res.status(400).json({err:error.message})
         }
         res.status(200).send(`Route has been modified with ID: ${id}`)
       }
@@ -48,11 +52,25 @@ const RouteController = {
   
         pool.query('DELETE FROM route WHERE route_id = $1', [id], (error, results) => {
           if (error) {
-            throw error
+            //throw error
+            return res.status(400).json({err:error.message})
           }
           res.status(200).send(`Route has been deleted with ID: ${id}`)
         })
-    }
+    },
+
+    async getRoutesByCountry(req,res){
+      const {dep_country, arrive_country} = req.body
+      console.log(req.body)
+      pool.query('SELECT * FROM route WHERE dep_country = $1 AND arrive_country = $2',[dep_country, arrive_country], (error, results) => {
+        if (error) {
+          //throw error
+          return res.status(400).json({err:error.message})
+        }
+        res.status(200).json(results.rows)
+      })
+  },
+  
 }
 
 module.exports = RouteController

@@ -7,5 +7,6 @@ router.get("/staff",StaffController.getAllStaff)
 router.get("/staff/:id",StaffController.getOneStaff)
 router.put("/staff/:id",StaffController.updateStaff)
 router.delete("/staff/:id",StaffController.deleteStaff)
+router.post("/staff/query",StaffController.getStaffQuary)
 
 module.exports = router

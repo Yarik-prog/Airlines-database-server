@@ -7,5 +7,6 @@ router.get("/route",RouteController.getAllRoutes)
 router.get("/route/:id",RouteController.getOneRoute)
 router.put("/route/:id",RouteController.updateRoute)
 router.delete("/route/:id",RouteController.deleteRoute)
+router.post("/route/query",RouteController.getRoutesByCountry)
 
 module.exports = router

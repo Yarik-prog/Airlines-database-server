@@ -7,5 +7,6 @@ router.get("/company",AviaCompanyController.getAllCompany)
 router.get("/company/:id",AviaCompanyController.getOneCompany)
 router.put("/company/:id",AviaCompanyController.updateCompany)
 router.delete("/company/:id",AviaCompanyController.deleteCompany)
+router.post("/company/query",AviaCompanyController.getCompanyQuary)
 
 module.exports = router
